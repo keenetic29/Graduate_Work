@@ -73,8 +73,11 @@ namespace Graduate_Work
               "загружается в облачное хранилище.";
             button1.Text = "Загрузить";
             button1.Visible = true;
+            treeView1.Nodes.Clear();
             menuStatus = "upload";
 
+            YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
+            treeView1.Nodes.Add(yandexDiskExplorer.GetYandexDiskStructure());
         }
 
 
@@ -102,6 +105,12 @@ namespace Graduate_Work
                         new Thread(() =>
                         {
                             yandexAPI.DownloadFile(yandexAPI.GetDownloadUrl(filePath, fileName), path);
+
+                            byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
+                            RC5FileProcessor processor = new RC5FileProcessor(key);
+                            string decryptedFileName = fileName.Substring(1);
+                            string decryptedPath = FBD.SelectedPath + '\\' + decryptedFileName;
+                            processor.DecryptFile(path, decryptedPath);
 
                         }).Start();
 
@@ -131,10 +140,14 @@ namespace Graduate_Work
                         path = openFileDialog1.FileName;
                         // скриптяра.txt
                         // C:\Users\andre\Downloads\скриптяра.txt
+                        byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
+                        RC5FileProcessor processor = new RC5FileProcessor(key);
+                        string encryptPath = Path.GetDirectoryName(fileName)+'_'+fileName;
+                        processor.EncryptFile(path, encryptPath);
 
                         new Thread(() =>
                         {
-                            yandexAPI.UploadFile(yandexAPI.GetUploadUrl(YandexDir, fileName), path);
+                            yandexAPI.UploadFile(yandexAPI.GetUploadUrl(YandexDir, '_'+fileName), encryptPath);
 
                         }).Start();
                     }
