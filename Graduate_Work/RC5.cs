@@ -104,12 +104,12 @@ namespace Graduate_Work
             }
         }
 
-        /// <summary>
-        /// Циклический сдвиг битов слова влево
-        /// </summary>
-        /// <param name="a">машинное слово: 64 бита</param>
-        /// <param name="offset">смещение</param>
-        /// <returns>машинное слово: 64 бита</returns>
+       /* 
+        * Циклический сдвиг битов слова влево
+        * a: машинное слово = 64 бита
+        * offset: смещение
+        * возвращает машинное слово: 64 бита
+        */
         private UInt64 ROL(UInt64 a, int offset)
         {
             UInt64 r1, r2;
@@ -119,12 +119,12 @@ namespace Graduate_Work
 
         }
 
-        /// <summary>
-        /// Циклический сдвиг битов слова вправо
-        /// </summary>
-        /// <param name="a">машинное слово: 64 бита</param>
-        /// <param name="offset">смещение</param>
-        /// <returns>машинное слово: 64 бита</returns>
+       /* 
+        * Циклический сдвиг битов слова вправо
+        * a: машинное слово = 64 бита
+        * offset: смещение
+        * возвращает машинное слово: 64 бита
+        */
         private UInt64 ROR(UInt64 a, int offset)
         {
             UInt64 r1, r2;
@@ -134,12 +134,12 @@ namespace Graduate_Work
 
         }
 
-        /// <summary>
-        /// Свертка слова (64 бит) по 8-ми байтам
-        /// </summary>
-        /// <param name="b">массив байтов</param>
-        /// <param name="p">позиция</param>
-        /// <returns></returns>
+
+       /*
+        * Свертка слова (64 бит) по 8-ми байтам
+        * b: массив байтов
+        * p: позиция
+        */
         private static UInt64 BytesToUInt64(byte[] b, int p)
         {
             UInt64 r = 0;
@@ -152,12 +152,12 @@ namespace Graduate_Work
             return r;
         }
 
-        /// <summary>
-        /// Развертка слова (64 бит) по 8-ми байтам
-        /// </summary>
-        /// <param name="a">64-битное слово</param>
-        /// <param name="b">массив байтов</param>
-        /// <param name="p">позиция</param>
+       /*
+        * Развертка слова (64 бит) по 8-ми байтам
+        * a: 64-битное слово
+        * b: массив байтов
+        * p: позиция
+        */
         private static void UInt64ToBytes(UInt64 a, byte[] b, int p)
         {
             for (int i = 0; i < 7; i++)
@@ -168,11 +168,11 @@ namespace Graduate_Work
             b[p + 7] = (byte)(a & 0xFF);
         }
 
-        /// <summary>
-        /// Операция шифрования
-        /// </summary>
-        /// <param name="inBuf">входной буфер для шифруемых данных (64 бита)</param>
-        /// <param name="outBuf">выходной буфер (64 бита)</param>
+       /* 
+        * Операция шифрования
+        * inBuf: входной буфер для шифруемых данных (64 бита)
+        * outBuf: выходной буфер (64 бита)
+        */
         public void Cipher(byte[] inBuf, byte[] outBuf)
         {
             UInt64 a = BytesToUInt64(inBuf, 0);
@@ -191,11 +191,11 @@ namespace Graduate_Work
             UInt64ToBytes(b, outBuf, 8);
         }
 
-        /// <summary>
-        /// Операция расшифрования
-        /// </summary>
-        /// <param name="inBuf">входной буфер для шифруемых данных (64 бита)</param>
-        /// <param name="outBuf">выходной буфер (64 бита)</param>
+       /*
+        * Операция расшифрования
+        * inBuf: входной буфер для шифруемых данных (64 бита)
+        * outBuf: выходной буфер (64 бита)
+        */
         public void Decipher(byte[] inBuf, byte[] outBuf)
         {
             UInt64 a = BytesToUInt64(inBuf, 0);

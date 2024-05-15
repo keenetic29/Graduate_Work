@@ -13,9 +13,9 @@ namespace Graduate_Work
 {
     public partial class Form1 : Form
     {
-        public string informationFormString = "C:\\Users\\andre\\Desktop";
 
         private Form2 informationForm;
+        public PictureBox pBox;
 
         private string fileName;
         private string path;
@@ -28,15 +28,16 @@ namespace Graduate_Work
 
             openFileDialog1.Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 
-            //что-то где-то пошло не так...
+
             textBox1.SelectAll(); // Выделяем весь текст
             textBox1.SelectionLength = 0; // Сбрасываем выделение
 
-            PictureBox pBox = new PictureBox();
+            pBox = new PictureBox();
             pBox.Location = new Point(482, 127);
             pBox.Width = 14;
             pBox.Height = 14;
             pBox.SizeMode = PictureBoxSizeMode.StretchImage;
+
             pBox.Image = Image.FromFile("C:\\Users\\andre\\source\\repos\\Projects\\Graduate_Work\\Graduate_Work\\Resources\\refresh-button.png");
             panel1.Controls.Add(pBox);
             pBox.BringToFront();
@@ -53,35 +54,62 @@ namespace Graduate_Work
             }
         }
 
-        private void DownloadToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void DownloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             textBox1.Text = "Для расшифровки и загрузки файла на локальный диск необходимо" +
               " выбрать интересующий Вас файл в структуре Яндекс Диска и нажать на кнопку 'Скачать'.";
             button1.Text = "Скачать";
             button1.Visible = true;
-            treeView1.Nodes.Clear();
+            //treeView1.Nodes.Clear();
             menuStatus = "download";
 
-            YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
-            treeView1.Nodes.Add(yandexDiskExplorer.GetYandexDiskStructure());
+            //YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
+            //treeView1.Nodes.Add(yandexDiskExplorer.GetYandexDiskStructure());
+
+            await Task.Run(() =>
+            {
+                YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
+                var yandexDiskStructure = yandexDiskExplorer.GetYandexDiskStructure();
+
+                // Используем Control.Invoke для обновления UI из фонового потока
+                pBox.Invoke(new Action(() =>
+                {
+                    treeView1.Nodes.Clear();
+                    treeView1.Nodes.Add(yandexDiskStructure);
+                }));
+            });
+
         }
 
-        private void UploadToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void UploadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             textBox1.Text = "Для шифрования и загрузки файла в облачное хранилище необходимо выбрать папку в структуре Яндекс Диска, " +
               "в которую будет загружен файл. После чего нажать на кнопку 'Загрузить'. Выбранный файл автоматически шифруется, затем " +
               "загружается в облачное хранилище.";
             button1.Text = "Загрузить";
             button1.Visible = true;
-            treeView1.Nodes.Clear();
+            //treeView1.Nodes.Clear();
             menuStatus = "upload";
 
-            YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
-            treeView1.Nodes.Add(yandexDiskExplorer.GetYandexDiskStructure());
+            //YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
+            //treeView1.Nodes.Add(yandexDiskExplorer.GetYandexDiskStructure());
+
+            await Task.Run(() =>
+            {
+                YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
+                var yandexDiskStructure = yandexDiskExplorer.GetYandexDiskStructure();
+
+                // Используем Control.Invoke для обновления UI из фонового потока
+                pBox.Invoke(new Action(() =>
+                {
+                    treeView1.Nodes.Clear();
+                    treeView1.Nodes.Add(yandexDiskStructure);
+                }));
+            });
         }
 
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
             if (menuStatus == "download")
 			{
@@ -102,7 +130,7 @@ namespace Graduate_Work
 
                         //создание апи, метод скачивания
                         YandexAPI yandexAPI = new YandexAPI();
-                        new Thread(() =>
+                        await Task.Run(() =>
                         {
                             yandexAPI.DownloadFile(yandexAPI.GetDownloadUrl(filePath, fileName), path);
 
@@ -112,7 +140,7 @@ namespace Graduate_Work
                             string decryptedPath = FBD.SelectedPath + '\\' + decryptedFileName;
                             processor.DecryptFile(path, decryptedPath);
 
-                        }).Start();
+                        });
 
                     }
                     else
@@ -145,11 +173,11 @@ namespace Graduate_Work
                         string encryptPath = Path.GetDirectoryName(fileName)+'_'+fileName;
                         processor.EncryptFile(path, encryptPath);
 
-                        new Thread(() =>
+                        await Task.Run(() =>
                         {
                             yandexAPI.UploadFile(yandexAPI.GetUploadUrl(YandexDir, '_'+fileName), encryptPath);
 
-                        }).Start();
+                        });
                     }
 					else
 					{
@@ -163,12 +191,21 @@ namespace Graduate_Work
 
         }
 
-		private void pictureBox1_Click(object sender, EventArgs e)
+		private async void pictureBox1_Click(object sender, EventArgs e)
 		{
-            treeView1.Nodes.Clear();
+            await Task.Run(() =>
+            {
+                YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
+                var yandexDiskStructure = yandexDiskExplorer.GetYandexDiskStructure();
 
-            YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
-            treeView1.Nodes.Add(yandexDiskExplorer.GetYandexDiskStructure());
+                // Используем Control.Invoke для обновления UI из фонового потока
+                pBox.Invoke(new Action(() =>
+                {
+                    treeView1.Nodes.Clear();
+                    treeView1.Nodes.Add(yandexDiskStructure);
+                }));
+            });
+
         }
 
 
