@@ -67,7 +67,46 @@ private async void UploadToolStripMenuItem_Click(object sender, EventArgs e)
       });
 }
 ```
-   
+
+Кусочек кода из `YandexDiskExplorer.cs` класса `YandexDiskExplorer` (построение структуры диска):
+```csharp
+public TreeNode GetYandexDiskStructure(string yandexDir = "/")
+{
+      var rootNode = new TreeNode(yandexDir);
+      FillYandexDiskStructure(rootNode, yandexDir);
+      return rootNode;
+}
+
+private void FillYandexDiskStructure(TreeNode parentNode, string yandexDir)
+{
+      var resources = GetResources(yandexDir);
+      foreach (var resource in resources)
+      {
+          var node = new TreeNode(resource.Name);
+          if (resource.Type == "dir")
+          {
+              FillYandexDiskStructure(node, resource.Path);
+          }
+          parentNode.Nodes.Add(node);
+      }
+}
+
+private List<Resource> GetResources(string yandexDir)
+{
+      var request = WebRequest.Create($"https://cloud-api.yandex.net/v1/disk/resources?path={yandexDir}");
+      request.Headers["Authorization"] = "OAuth " + AccessToken;
+      request.Method = "GET";
+
+      using (var response = request.GetResponse())
+      using (var stream = response.GetResponseStream())
+      using (var reader = new StreamReader(stream, Encoding.UTF8))
+      {
+          var json = reader.ReadToEnd();
+          var resourcesResponse = JsonConvert.DeserializeObject<ResourcesResponse>(json);
+          return resourcesResponse._embedded.items;
+      }
+}
+ ```  
 2. Чтобы загрузить файл, необходимо выбрать папку в структуре Диска, в которую будет помещен файл.
 
 ![image](https://github.com/keenetic29/Graduate_Work/assets/122115141/cbd30316-faf8-43a3-8332-d8a3c62a0fc7)
@@ -303,7 +342,7 @@ public void DecryptFile(string inputFilePath, string outputFilePath)
       using (var inputStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
       using (var outputStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
       {
-          byte[] buffer = new byte[16]; // Размер блока для RC5 (2 слова по 64 бита)
+          byte[] buffer = new byte[16]; // byte = 8 бит. Размер блока для RC5 (2 слова по 64 бита) = 128бит = 8 * 16
           int bytesRead;
           while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
           {
@@ -315,7 +354,7 @@ public void DecryptFile(string inputFilePath, string outputFilePath)
 }
 ```
 
-Кусочек кода из `RC5.cs`, класс `RС5` (метод шифрования):
+Кусочек кода из `RC5.cs`, класс `RС5` (метод расшифрования):
 ```csharp
 /*
 * Операция расшифрования
