@@ -188,7 +188,6 @@ public string GetUploadUrl(string YandexDir, string FileName)
 //Отправляем файл на ЯД по указанной ссылке.
 public bool UploadFile(string Url, string FilePath)
 {
-      //Console.WriteLine(Url);
       var request = WebRequest.Create(Url);
       request.Method = "PUT";
       request.ContentType = "application/binary";
