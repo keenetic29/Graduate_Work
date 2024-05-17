@@ -164,6 +164,68 @@ private async void button1_Click(object sender, EventArgs e)
 }
 ```
 
+Кусочек кода из `YandexAPI.cs` (получение ссылки на загрузку):
+```csharp
+public string GetUploadUrl(string YandexDir, string FileName)
+{
+      var request = YandexDir == "/" ? (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/upload?path=/" + FileName)) : (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/upload?path=" + YandexDir + '/' + FileName));
+      request.Headers["Authorization"] = "OAuth " + AccessToken;
+      request.Method = "GET";
+
+      HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+      using (Stream responseStream = response.GetResponseStream())
+      {
+          StreamReader reader = new StreamReader(responseStream, Encoding.UTF8);
+          var url = JsonConvert.DeserializeObject<ReceiveURL>(reader.ReadToEnd());
+          return url.href;
+      }
+}
+```
+
+Кусочек кода из `YandexAPI.cs` (загрузка файла по ссылке):
+```csharp
+//Отправляем файл на ЯД по указанной ссылке.
+public bool UploadFile(string Url, string FilePath)
+{
+      //Console.WriteLine(Url);
+      var request = WebRequest.Create(Url);
+      request.Method = "PUT";
+      request.ContentType = "application/binary";
+      try
+      {
+          using (Stream myReqStream = request.GetRequestStream())
+          {
+              using (FileStream myFile = new FileStream(FilePath, FileMode.Open, FileAccess.Read))
+              {
+                  using (BinaryReader myReader = new BinaryReader(myFile))
+                  {
+                      byte[] buffer = myReader.ReadBytes(2048);
+                      while (buffer.Length > 0)
+                      {
+                          myReqStream.Write(buffer, 0, buffer.Length);
+                          buffer = myReader.ReadBytes(2048);
+                      }
+                  }
+              }
+          }
+      }
+      catch (Exception ex)
+      {
+          return false;
+      }
+
+      try
+      {
+          HttpWebResponse resp = (HttpWebResponse)request.GetResponse();
+      }
+      catch (Exception ex)
+      {
+          return false;
+      }
+      return true;
+}
+```
+
 4. Подождав определенное время, которое занимает шифрование и загрузка файла на диск, можно убедиться, что файл действительно загружен, обновив структуру диска, нажав на значок обновления правее от структуры.
 
 ![image](https://github.com/keenetic29/Graduate_Work/assets/122115141/4f7477ad-7822-4973-a1be-8d730929f20e)
@@ -335,6 +397,59 @@ private async void button1_Click(object sender, EventArgs e)
 }
 ```
 
+Кусочек кода из `YandexAPI.cs` (получение ссылки на скачивание файла):
+```csharp
+public string GetDownloadUrl(string YandexDir, string FileName)
+{
+      var request = YandexDir == "/" ? (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/download?path=/" + FileName)) : (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/download?path=" + YandexDir + '/' + FileName));
+      request.Headers["Authorization"] = "OAuth " + AccessToken;
+      request.Method = "GET";
+
+      HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+      using (Stream responseStream = response.GetResponseStream())
+      {
+          StreamReader reader = new StreamReader(responseStream, Encoding.UTF8);
+          var url = JsonConvert.DeserializeObject<ReceiveURL>(reader.ReadToEnd());
+          return url.href;
+      }
+}
+```
+
+Кусочек кода из `YandexAPI.cs` (скачивание файла по ссылке):
+```csharp
+public bool DownloadFile(string Url, string FilePath)
+{
+      var request = WebRequest.Create(Url);
+      request.Method = "GET";
+
+      try
+      {
+          using (WebResponse response = request.GetResponse())
+          {
+              using (Stream responseStream = response.GetResponseStream())
+              {
+                  using (FileStream fileStream = new FileStream(FilePath, FileMode.Create, FileAccess.Write))
+                  {
+                      byte[] buffer = new byte[4096];
+                      int bytesRead;
+                      while ((bytesRead = responseStream.Read(buffer, 0, buffer.Length)) > 0)
+                      {
+                          fileStream.Write(buffer, 0, bytesRead);
+                      }
+                  }
+              }
+          }
+      }
+      catch (Exception ex)
+      {
+          // Обработка исключений
+          return false;
+      }
+      return true;
+}
+``` 
+
+
 Кусочек кода из `RC5.cs`, класс `RC5FileProcessor` (запуск процесса расшифрования):
 ```csharp
 public void DecryptFile(string inputFilePath, string outputFilePath)
@@ -383,6 +498,7 @@ public void Decipher(byte[] inBuf, byte[] outBuf)
 4. Открыв выбранную папку и подождав некоторое время, можно убедиться, что файл действительно скачен.
 
 ![image](https://github.com/keenetic29/Graduate_Work/assets/122115141/e1ac1066-06c6-47c4-b370-c8f38d14b1f9)
+
 
 5. При попытке открытия и просмотра файла, можно понять, что файл действительно расшифрован.
 
