@@ -43,6 +43,7 @@ namespace Graduate_Work
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.label1 = new System.Windows.Forms.Label();
 			this.treeView1 = new System.Windows.Forms.TreeView();
+			this.label2 = new System.Windows.Forms.Label();
 			this.toolStrip1.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -76,7 +77,7 @@ namespace Graduate_Work
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(309, 536);
+			this.button1.Location = new System.Drawing.Point(301, 551);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(174, 39);
 			this.button1.TabIndex = 2;
@@ -131,13 +132,14 @@ namespace Graduate_Work
 			// panel1
 			// 
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panel1.Controls.Add(this.label2);
 			this.panel1.Controls.Add(this.label1);
 			this.panel1.Controls.Add(this.treeView1);
 			this.panel1.Controls.Add(this.textBox1);
 			this.panel1.Controls.Add(this.menuStrip1);
 			this.panel1.Location = new System.Drawing.Point(12, 76);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(776, 454);
+			this.panel1.Size = new System.Drawing.Size(776, 469);
 			this.panel1.TabIndex = 1;
 			// 
 			// label1
@@ -156,11 +158,20 @@ namespace Graduate_Work
 			this.treeView1.Size = new System.Drawing.Size(727, 205);
 			this.treeView1.TabIndex = 2;
 			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(22, 434);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(251, 20);
+			this.label2.TabIndex = 4;
+			this.label2.Text = "Статус файла: Файл не выбран";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(798, 587);
+			this.ClientSize = new System.Drawing.Size(798, 598);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.toolStrip1);
@@ -192,6 +203,7 @@ namespace Graduate_Work
 		private Panel panel1;
 		private Label label1;
 		private TreeView treeView1;
+		private Label label2;
 	}
 }
 

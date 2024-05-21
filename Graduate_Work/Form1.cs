@@ -56,6 +56,7 @@ namespace Graduate_Work
 
         private async void DownloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            label2.Text = "Статус файла: Файл не выбран";
             textBox1.Text = "Для расшифровки и загрузки файла на локальный диск необходимо" +
               " выбрать интересующий Вас файл в структуре Яндекс Диска и нажать на кнопку 'Скачать'.";
             button1.Text = "Скачать";
@@ -83,6 +84,7 @@ namespace Graduate_Work
 
         private async void UploadToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            label2.Text = "Статус файла: Файл не выбран";
             textBox1.Text = "Для шифрования и загрузки файла в облачное хранилище необходимо выбрать папку в структуре Яндекс Диска, " +
               "в которую будет загружен файл. После чего нажать на кнопку 'Загрузить'. Выбранный файл автоматически шифруется, затем " +
               "загружается в облачное хранилище.";
@@ -132,13 +134,17 @@ namespace Graduate_Work
                         YandexAPI yandexAPI = new YandexAPI();
                         await Task.Run(() =>
                         {
+                            
+                            UpdateStatusLabelAsync("Статус файла: Идет процесс  скачивания...");
                             yandexAPI.DownloadFile(yandexAPI.GetDownloadUrl(filePath, fileName), path);
+                            UpdateStatusLabelAsync("Статус файла: Скачивание завершено. Идет процесс  расшифрования...");
 
                             byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
                             RC5FileProcessor processor = new RC5FileProcessor(key);
                             string decryptedFileName = fileName.Substring(1);
                             string decryptedPath = FBD.SelectedPath + '\\' + decryptedFileName;
                             processor.DecryptFile(path, decryptedPath);
+                            UpdateStatusLabelAsync("Статус файла: Скачивание завершено. Расшифрование завершено.");
 
                         });
 
@@ -166,17 +172,20 @@ namespace Graduate_Work
                         // получаем выбранный файл
                         fileName = Path.GetFileName(openFileDialog1.FileName);
                         path = openFileDialog1.FileName;
-                        // скриптяра.txt
-                        // C:\Users\andre\Downloads\скриптяра.txt
+
                         byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
                         RC5FileProcessor processor = new RC5FileProcessor(key);
                         string encryptPath = Path.GetDirectoryName(fileName)+'_'+fileName;
-                        processor.EncryptFile(path, encryptPath);
+
+                        
 
                         await Task.Run(() =>
                         {
+                            UpdateStatusLabelAsync("Статус файла: Идет процесс  шифрования...");
+                            processor.EncryptFile(path, encryptPath);
+                            UpdateStatusLabelAsync("Статус файла: Шифрование завершено. Идет процесс загрузки файла...");
                             yandexAPI.UploadFile(yandexAPI.GetUploadUrl(YandexDir, '_'+fileName), encryptPath);
-
+                            UpdateStatusLabelAsync("Статус файла: Шифрование завершено. Загрузка завершена.");
                         });
                     }
 					else
@@ -193,6 +202,7 @@ namespace Graduate_Work
 
 		private async void pictureBox1_Click(object sender, EventArgs e)
 		{
+            label2.Text = "Статус файла: Файл не выбран";
             await Task.Run(() =>
             {
                 YandexDiskExplorer yandexDiskExplorer = new YandexDiskExplorer();
@@ -208,6 +218,10 @@ namespace Graduate_Work
 
         }
 
+        private async void UpdateStatusLabelAsync(string statusText)
+        {
+            label2.Invoke(new Action(() => label2.Text = statusText));
+        }
 
-	}
+    }
 }
