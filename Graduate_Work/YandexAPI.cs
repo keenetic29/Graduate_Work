@@ -11,7 +11,8 @@ namespace Graduate_Work
 {
     public class YandexAPI : IYandex
     {
-        private string AccessToken { get; set; } = "y0_AgAAAABsexpOAAtyiwAAAAD-PFE4AABRJVxPHOJCTZOfW7I8lWqk_1XBPg";
+        private string filePath = "data.json";
+        private string AccessToken { get; set; }
 
         public bool DownloadFile(string Url, string FilePath)
         {
@@ -47,7 +48,10 @@ namespace Graduate_Work
 
         public string GetDownloadUrl(string YandexDir, string FileName)
         {
-            var request = YandexDir == "/" ? (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/download?path=/" + FileName)) : (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/download?path=" + YandexDir + '/' + FileName));
+            var request = YandexDir == "/" ? (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/download?path=/" + FileName+ "&overwrite=true")) :
+                (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/download?path=" + YandexDir + '/' + FileName+ "&overwrite=true"));
+            var data = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(filePath));
+            AccessToken = data.TextBoxToken?.ToString() ?? "";
             request.Headers["Authorization"] = "OAuth " + AccessToken;
             request.Method = "GET";
 
@@ -62,7 +66,10 @@ namespace Graduate_Work
 
         public string GetUploadUrl(string YandexDir, string FileName)
         {
-            var request = YandexDir == "/" ? (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/upload?path=/" + FileName)) : (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/upload?path=" + YandexDir + '/' + FileName));
+            var request = YandexDir == "/" ? (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/upload?path=/" + FileName + "&overwrite=true")) :
+                (WebRequest.Create("https://cloud-api.yandex.net/v1/disk/resources/upload?path=" + YandexDir + '/' + FileName + "&overwrite=true"));
+            var data = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(filePath));
+            AccessToken = data.TextBoxToken?.ToString() ?? "";
             request.Headers["Authorization"] = "OAuth " + AccessToken;
             request.Method = "GET";
 
@@ -78,7 +85,6 @@ namespace Graduate_Work
         //Отправляем файл на ЯД по указанной ссылке.
         public bool UploadFile(string Url, string FilePath)
         {
-            Console.WriteLine(Url);
             var request = WebRequest.Create(Url);
             request.Method = "PUT";
             request.ContentType = "application/binary";

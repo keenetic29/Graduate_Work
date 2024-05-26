@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -121,32 +123,45 @@ namespace Graduate_Work
                 {
                     if (treeView1.SelectedNode != null)
                     {
-                        // Выбранная нода
-                        TreeNode selectedNode = treeView1.SelectedNode;
-                        var fileName = selectedNode.Text;
-                        var filePath = (selectedNode.Parent).FullPath;
-                        filePath = filePath.Substring(1, filePath.Length-1);
-                        filePath = filePath.Replace('\\', '/');
-                        path = FBD.SelectedPath + '\\' + fileName;
-
-
-                        //создание апи, метод скачивания
-                        YandexAPI yandexAPI = new YandexAPI();
-                        await Task.Run(() =>
+                        string pathJson = "data.json";
+                        byte[] key;
+                        if (File.Exists(pathJson))
                         {
-                            
-                            UpdateStatusLabelAsync("Статус файла: Идет процесс  скачивания...");
-                            yandexAPI.DownloadFile(yandexAPI.GetDownloadUrl(filePath, fileName), path);
-                            UpdateStatusLabelAsync("Статус файла: Скачивание завершено. Идет процесс  расшифрования...");
+                            var data = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(pathJson));
+                            key = Encoding.UTF8.GetBytes(data.TextBoxKey?.ToString() ?? "");
 
-                            byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
-                            RC5FileProcessor processor = new RC5FileProcessor(key);
-                            string decryptedFileName = fileName.Substring(1);
-                            string decryptedPath = FBD.SelectedPath + '\\' + decryptedFileName;
-                            processor.DecryptFile(path, decryptedPath);
-                            UpdateStatusLabelAsync("Статус файла: Скачивание завершено. Расшифрование завершено.");
+                            // Выбранная нода
+                            TreeNode selectedNode = treeView1.SelectedNode;
+                            var fileName = selectedNode.Text;
+                            var filePath = (selectedNode.Parent).FullPath;
+                            filePath = filePath.Substring(1, filePath.Length - 1);
+                            filePath = filePath.Replace('\\', '/');
+                            path = FBD.SelectedPath + '\\' + fileName;
 
-                        });
+
+                            //создание апи, метод скачивания
+                            YandexAPI yandexAPI = new YandexAPI();
+                            await Task.Run(() =>
+                            {
+
+                                UpdateStatusLabelAsync("Статус файла: Идет процесс  скачивания...");
+                                yandexAPI.DownloadFile(yandexAPI.GetDownloadUrl(filePath, fileName), path);
+                                UpdateStatusLabelAsync("Статус файла: Скачивание завершено. Идет процесс  расшифрования...");
+
+                                //byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
+                                RC5FileProcessor processor = new RC5FileProcessor(key);
+                                string decryptedFileName = fileName.Substring(1);
+                                string decryptedPath = FBD.SelectedPath + '\\' + decryptedFileName;
+                                processor.DecryptFile(path, decryptedPath);
+                                UpdateStatusLabelAsync("Статус файла: Скачивание завершено. Расшифрование завершено.");
+
+                            });
+                        }
+                        else
+                        {
+                            MessageBox.Show("Алгоритм шифрования не настроен");
+                        }
+
 
                     }
                     else
@@ -163,30 +178,42 @@ namespace Graduate_Work
 				{
                     if (treeView1.SelectedNode != null /* && проверка что эта нода папка, а не файл*/)
 					{
-                        YandexAPI yandexAPI = new YandexAPI();
-                        TreeNode selectedNode = treeView1.SelectedNode;
-                        var YandexDir = selectedNode.FullPath;
-                        YandexDir = YandexDir.Substring(1, YandexDir.Length - 1);
-                        YandexDir = YandexDir.Replace('\\', '/');
-
-                        // получаем выбранный файл
-                        fileName = Path.GetFileName(openFileDialog1.FileName);
-                        path = openFileDialog1.FileName;
-
-                        byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
-                        RC5FileProcessor processor = new RC5FileProcessor(key);
-                        string encryptPath = Path.GetDirectoryName(fileName)+'_'+fileName;
-
-                        
-
-                        await Task.Run(() =>
+                        string pathJson = "data.json";
+                        byte[] key;
+                        if (File.Exists(pathJson))
                         {
-                            UpdateStatusLabelAsync("Статус файла: Идет процесс  шифрования...");
-                            processor.EncryptFile(path, encryptPath);
-                            UpdateStatusLabelAsync("Статус файла: Шифрование завершено. Идет процесс загрузки файла...");
-                            yandexAPI.UploadFile(yandexAPI.GetUploadUrl(YandexDir, '_'+fileName), encryptPath);
-                            UpdateStatusLabelAsync("Статус файла: Шифрование завершено. Загрузка завершена.");
-                        });
+                            var data = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(pathJson));
+                            key = Encoding.UTF8.GetBytes(data.TextBoxKey?.ToString() ?? "");
+                            YandexAPI yandexAPI = new YandexAPI();
+                            TreeNode selectedNode = treeView1.SelectedNode;
+                            var YandexDir = selectedNode.FullPath;
+                            YandexDir = YandexDir.Substring(1, YandexDir.Length - 1);
+                            YandexDir = YandexDir.Replace('\\', '/');
+
+                            // получаем выбранный файл
+                            fileName = Path.GetFileName(openFileDialog1.FileName);
+                            path = openFileDialog1.FileName;
+
+                            //byte[] key = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 }; // Пример ключа
+                            RC5FileProcessor processor = new RC5FileProcessor(key);
+                            string encryptPath = Path.Combine(Path.GetDirectoryName(path), "_" + fileName);
+
+
+
+                            await Task.Run(() =>
+                            {
+                                UpdateStatusLabelAsync("Статус файла: Идет процесс  шифрования...");
+                                processor.EncryptFile(path, encryptPath);
+                                UpdateStatusLabelAsync("Статус файла: Шифрование завершено. Идет процесс загрузки файла...");
+                                yandexAPI.UploadFile(yandexAPI.GetUploadUrl(YandexDir, '_' + fileName), encryptPath);
+                                UpdateStatusLabelAsync("Статус файла: Шифрование завершено. Загрузка завершена.");
+                            });
+                        }
+                        else
+						{
+                            MessageBox.Show("Алгоритм шифрования не настроен");
+                        }
+                        
                     }
 					else
 					{
